@@ -1,0 +1,103 @@
+1.	Assuming the XINU text begins at address 0x0, draw a rough diagram of XINU's memory layout with addresses derived from your experimental measurements. Include the information you uncovered from running your version of printsegaddress() and printprocstks().
+	
+
+|         	   |   	   
+|  Stack   |
+|          	   |
+ —————————— <————— Stack pointer [0x00ffef90]
+|	   |
+|          	   |
+|  Free     |
+———— 
+| heap	   |
+|          	   |
+ —————————  <————— end  [0x00029c38]
+|              | 
+|  bss       |
+|              |
+ ————————-  <————— edata [0x000215bc]
+|              |
+|  data     |
+|              |
+ —————————  <————— etext [0x0001c3a0]
+|             |
+|  text     |
+|             |
+ ——— ——————-  <————— lowest address [0x0] 
+
+
+2.  What is the difference in stack top address before and after calling printtos() ? Draw a diagram to illustrate what are the contents of the items pushed into the stack between these two time points.
+
+		|		|
+		|		|
+		——————
+		|   Argument 1 |                  
+		|		|
+		|		|
+		—————— <——————  top of the stack before calling printtos function[0x00ffefc0] 
+		|		|
+		|  Return 	|
+		|   address 	|
+		|		|
+		___________
+		|		|	
+		|  Saved EBP   |		
+		|		|
+		|		|
+		—————— <—————— top of the stack immediately after calling prints function[0x00ffefb8]
+		|		|
+
+Stack grows downward in above diagram :
+Before calling printtos() function, the caller pushes registers in the stack following with the arguments of the to be called function.  When the function is called the return address and the content of the base pointer is pushed in the stack. Thus ebp points to the
+Location immidiately after the function is called and ebp - 2 points the location just before the function is called.
+
+3. Which byte order is adopted in the host machine that we are using ? How did you find out ?
+the byte order adoptes in LITTLE_ENDIAN
+below code when ran on the machine, the output was Little endian.
+the char c in the below program points to the interger i. this when typecasted to a char pointer. if points to the bit 1 means the system follows little endian byte order, else if wil point to 0.
+int main() 
+{
+   unsigned int i = 1;
+   char *c = (char*)&i;
+   if (*c)    
+       printf("Little endian");
+   else
+       printf("Big endian");
+   getchar();
+   return 0;
+}
+
+
+4. Briefly describe the mov, push, pusha, pop, and popa instructions in the x86.
+Mov : copies the second operand to the first operand. Source can be  a register , memory location or a constant and destination can be a register or memory location. Direct move from memory to memory is not possible. For that we need to first load the source to register and then move to another memory. 
+Below is the syntax:
+	mov source, destination
+ 	mov <reg>, <reg>
+	mov <reg>, <mem>
+	mov <mem>, < reg>
+	mov < reg> , <constant>
+	mov <mem>, <constant>
+
+Push: 	Push operation places the source to the hardware supported stack in memory.  The stack is maintained by the stack pointer which is called ESP, ESP decrements with a push operation. As the stack grows from higher memory address to lower.
+Below is the syntax:
+	push source
+	push <reg>
+	push <mem>
+	push <constant>
+
+Pusha:
+	Pusha instruction pushes all general purposes registers with only one instruction on to the stack in the order AX, CX, DX, BX, SP, BP, SI, DI.
+
+Pop:
+	pop operation removes elements from the top of the task into specified operand.
+	syntax: 
+	pop  <reg>
+
+Popa:
+	popa instruction pops all the general purpose registers from  the stack with only one instruction in the reverse order of PUSHA. That is, DI, SI, BP, SP, BX, DX, CX, AX. 
+	
+	
+
+5. In a stack frame, local variables are stored below the top of the stack. In task 3, does your result show all the local variables declared in your printtos function? If not, can you explain that? (hint: try to disable the compiler optimization by specifing -O0 in your Makefile)
+	No the result does not show local variables as compiler optimization moves the local variables to different registers.
+ 

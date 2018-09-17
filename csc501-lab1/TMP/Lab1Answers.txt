@@ -1,0 +1,63 @@
+dditional Questions:
+Unity ID: mreddy2
+
+1. What are the advantages and disadvantages of each of the two scheduling policies? Also, give the advantages and disadvantages of the round robin scheduling policy originally implemented in Xinu.
+
+Random Scheduler:
+  Advantages:
+->In Random Scheduler, it prevents starvation in scheduling which prevents from scheduling the higher priority always since random number generated may be higher than the highest priority process in which case we subtract it and mover further in the list which results in scheduling a lower priority process also. 
+->In this, it gives the opportunity for all the processes to be run preventing starvation and at the same time higher priority process is scheduled based on the probability
+Which is higher and proportional to its priority. 
+
+Disadvantages:
+->Since we use random number generation, the scheduling is quite unpredictable because every time we cannot predict the random number that means we cannot predict which process will be scheduled.
+->Here the turn around time for the process with higher priority increases. 
+->Context Switch takes up more time in this scheduler since it involves computation of other variables for selecting the next process to be scheduled compared to Xinu's Default Scheduler. 
+
+
+
+Linux-Like-Scheduler:
+Advantages: 
+-> In Linux Like Scheduler also we prevent starvation since we schedule processes based on their goodness which we update and add extra goodness incase the process does not completely run in a particular epoch while the other do not get the extra edge which maintains fairness and prevents starvation. 
+-> The scheduling of the process is predictable, since it schedules based on goodness which we dynamically update while scheduling.
+-> Both the factors the priority and as well as the fairness of the process execution in every epoch is considered and fairness is maintained between all the processes. 
+
+
+Disadvantages:
+-> During this the time for context switching is more and at the same time more number of switches occur since once the preempt is exhausted we force a context switch.
+-> Needs to store and keep updating various factors like goodness, quantum which makes the whole implementation complex to handle. 
+-> In this scheduler we also observe that the turn around time for the higher priority processes increases.
+
+
+
+Xinu Default Implemented Scheduler:
+Advantages:
+-> Follows a simple policy scheduling processes with higher priority first always.
+-> The process with higher priority has less turn around time since in Xinu the process with higher priority will completely run. 
+-> Context switching is very less since switch happens only when it has to schedule another process which has highest priority.  
+
+Disadvantages:
+->Since higher priority is always favored, it leads to starvation and does not maintain fairness since processes with lower priority won't get CPU time incase there are many processes with higher priority. 
+->Low priority process might not get executed at all in some cases leading to high turn around time for low priority process and doesn't maintain fairness. 
+
+
+
+
+2. Assume that there are three processes P1, P2, P3 that will run forever without blocking. We want to allocate the following CPU times to each of them: 20% to P1, 30% to P2, and 50% to P3. Which priorities do we need to set to P1, P2, and P3 to accomplish this if we want to use the Random scheduler?  Assume that those processes are the only ones running in the machine. Could you give a generalization of your result to n processes? Explain.
+
+For the given case we have to assign such that the ratio between the three process is maintained as given based on the CPU times being used. 
+In this case we have P1 = 20% , P2= 30%, P3= 50% which means the ratio of the priorities should be maintained as 2:3:5. One possible case would be P1=20 , P2= 30 , P3=50. 
+Similarly in general for N number of processes we have say the CPU times need to be allocated be P1t%, P2t%, ...... Pnt%. 
+Then the Priorities Should be for any integer k>0
+P1 = (P1t/100) * k , 
+P2= (P2t/100) *k, ......  So on Pn = (Pnt/100) * k
+This maintains the ratio of the priorities to be same as the allocated CPU Times.
+
+
+
+3. Describe the way each of the schedulers affects the NULL process.
+
+In all the schedulers we have seen, NULL process is being scheduled only when we don't have any other process to be executed in the ready queue except for the NULL Process. 
+So based on the scheduling policies of each scheduler the handling of the NULL process varies, for instance in case of Linux Like Scheduler while selecting the process we check if the goodness is equal to 0 and at the same time the respective pid = 0 only then we are assured that there are no other processes in the ready queue and then we schedule the NULL Process. 
+In case of Random Scheduler when the sum of ready queue is equal to 0, that means that there is only NULL process in the ready queue and that is scheduled in that case, in this way the NULL process is handled in that case. 
+While the default Xinu scheduler always schedules higher priority process and when there is no processes in the ready queue then the process with the priority 0 is selected which is the NULL process. This way in various schedulers the scheduling of NULL Process is handled.
